@@ -56,9 +56,9 @@ function events_post_type(){
 		'items_list' => 'List of Events',
 		'menu_name' => 'Events',
 		'name_admin_bar' => 'Event',
-		'archives' => __('Event archives', 'events'),
-		'attributes' => __('Event attributes', 'events'),
-		'parent_item_colon' => __('Parent Event', 'events'),
+		'archives' => 'Event archives',
+		'attributes' => 'Event attributes',
+		'parent_item_colon' => 'Parent Event',
 		'view_items' => 'View Events',
 		'item_updated' => 'Event was updated',
 		'item_published' => 'Events was published',
@@ -71,7 +71,7 @@ function events_post_type(){
 		'public' => true,
 		'menu_position' => 5,
 		'has_archive' => true,
-		'supports' => array( 'title', 'excerpt', 'editor', 'author', 'revisions', 'comments', 'thumbnail'),
+		'supports' => array( 'title', 'excerpt', 'author', 'revisions', 'comments', 'thumbnail'),
 		'show_ui' => true,
 		'show_in_menu' => true,
 		'show_in_admin_bar' => true,
@@ -119,8 +119,8 @@ function events_callback($post) {
     $event_date = get_post_meta( $post->ID, 'events-date', true );
     $event_status = get_post_meta( $post->ID, 'events-status', true );
     $event_date = ! empty( $event_date ) ? $event_date : time();
-
     ?>
+
     <p><label for="events-date"><?php _e( 'Event Date', 'eventlist' ); ?></label>
 
         <input class="widefat" id="events-date" type="date" name="events-date" required maxlength="30"
@@ -169,8 +169,8 @@ add_action( 'save_post', 'events_save');
 
 function events_custom_columns( $defaults ) {
     unset( $defaults['date'] );
-    $defaults['events_date'] = __( 'Event Date', 'eventlist' );
-    $defaults['events_status'] = __( 'Event Status', 'eventlist' );
+    $defaults['events_date'] = 'Event Date';
+    $defaults['events_status'] ='Event Status';
     return $defaults;
 }
 add_filter( 'manage_edit_event_columns', 'events_custom_columns', 10 );
