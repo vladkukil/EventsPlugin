@@ -35,14 +35,14 @@ class Events_Widget extends WP_Widget {
 			} else {
 				$total_records = $number;
 			}
-
+			
 			for ( $i = 0; $i < $total_records; $i++ ) {
 				$the_query->the_post();
 				$event_date = date( ' Y/m/d.', intval( get_post_meta( $post->ID, 'events-date', true ) ) );
 				if( $event_date >= $current_date ) {
-				    echo '<li>' . get_the_title() . '</li>' . '</br>';
-				    echo 'Event Date: ' . date( ' Y/m/d.', intval( get_post_meta( $post->ID, 'events-date', true ) ) ) . '</br>';
-				    echo 'Event Status: ' . get_post_meta( $post->ID, 'events-status', true );
+					echo '<li>' . get_the_title() . '</li>' . '</br>';
+					echo 'Event Date: ' . date( ' Y/m/d.', intval( get_post_meta( $post->ID, 'events-date', true ) ) ) . '</br>';
+					echo 'Event Status: ' . get_post_meta( $post->ID, 'events-status', true );
 				}
 			}
 		}
