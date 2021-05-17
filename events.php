@@ -8,6 +8,8 @@ Version: 1.0
 Author: Vladyslav Kukil
 */
 
+require_once 'class-events-widget.php';
+
 function create_taxonomy_corporate(){
     $labels = array(
 	    'name'              => 'Categories',
@@ -41,29 +43,29 @@ function create_taxonomy_corporate(){
 
 function events_post_type(){
 	$labels = array(
-		'name' => 'Events',
-		'singular_name' => 'Event',
-		'add_new' => 'Add Event',
-		'add_new_item' => 'Adding Event',
-		'new_item' => 'New Event',
-		'view_item' => 'View Event',
-		'search_items' => 'Search Events',
-		'not_found' => 'Events not found',
-		'not_found_in_trash' => 'Events not fount in trash',
-		'all_items' => 'All Events',
-		'filter_items_list' => 'Filter Events',
-		'items_list_navigation' => 'Events navigation',
-		'items_list' => 'List of Events',
-		'menu_name' => 'Events',
-		'name_admin_bar' => 'Event',
-		'archives' => 'Event archives',
-		'attributes' => 'Event attributes',
-		'parent_item_colon' => 'Parent Event',
-		'view_items' => 'View Events',
-		'item_updated' => 'Event was updated',
-		'item_published' => 'Events was published',
-		'item_published_privately' => 'Events was published privately',
-		'item_reverted_to_draft' => 'Events not fount',
+		'name' => __('Events'),
+		'singular_name' => __('Event'),
+		'add_new' => __('Add Event'),
+		'add_new_item' => __('Adding Event'),
+		'new_item' => __('New Event'),
+		'view_item' => __('View Event'),
+		'search_items' => __('Search Events'),
+		'not_found' => __('Events not found'),
+		'not_found_in_trash' => __('Events not fount in trash'),
+		'all_items' => __('All Events'),
+		'filter_items_list' => __('Filter Events'),
+		'items_list_navigation' => __('Events navigation'),
+		'items_list' => __('List of Events'),
+		'menu_name' => __('Events'),
+		'name_admin_bar' => __('Event'),
+		'archives' => __('Event archives'),
+		'attributes' => __('Event attributes'),
+		'parent_item_colon' => __('Parent Event'),
+		'view_items' => __('View Events'),
+		'item_updated' => __('Event was updated'),
+		'item_published' => __('Events was published'),
+		'item_published_privately' => __('Events was published privately'),
+		'item_reverted_to_draft' => __('Events not fount'),
 	);
 
 	$args = array(
@@ -80,7 +82,7 @@ function events_post_type(){
 		'hierarchical' => false,
 		'exclude_from_search' => false,
 		'show_in_rest' => true,
-		'capability_type' => 'post',
+		'capability_type' => __('post'),
 		'rewrite' => array('slug' => 'events'),
 	);
 	register_post_type('events', $args);
@@ -105,31 +107,39 @@ function events_post_meta_boxes_setup() {
 function events_meta_box() {
 	add_meta_box(
 		'smashing-post-class',      // Unique ID
-		esc_html__( 'Status', 'eventlist' ),
+		esc_html__( 'Status'),
 		'events_callback',   // Callback function
 		'events',         // Admin page (or post type)
 		'side',         // Context
 		'default'         // Priority
 	);
 }
-function events_callback($post) {
+
+function events_callback() {
+	$events = get_posts( array(
+		'post_status' => 'publish',
+		'post_type' => 'events',
+	) );
     // generate a nonce field
     wp_nonce_field( 'events_meta_box', 'events_nonce' );
     // get previously saved meta values (if any)
-    $event_date = get_post_meta( $post->ID, 'events-date', true );
-    $event_status = get_post_meta( $post->ID, 'events-status', true );
-    $event_date = ! empty( $event_date ) ? $event_date : time();
+    foreach ($events as $event) {
+        $event_date = get_post_meta( $event->ID, 'events-date', true );
+        //$event_status = get_post_meta( $event->ID, 'events-status', true );
+        $event_date = ! empty( $event_date ) ? $event_date : time();
+    }
     ?>
 
-    <p><label for="events-date"><?php _e( 'Event Date', 'eventlist' ); ?></label>
-
+    <p><label for="events-date"><?php _e( 'Event Date'); ?>
         <input class="widefat" id="events-date" type="date" name="events-date" required maxlength="30"
-               placeholder="Event Date" value="<?php echo date('d.m.y',
-            sanitize_text_field( $event_date )); ?>" /></p>
+               placeholder="Event Date" value="<?php echo date(' YYYY-MM-DD.',
+            sanitize_text_field( $event_date )); ?>" /></label></p>
 
-    <p><label for="events-status"><?php _e( 'Event Status', 'eventlist' ); ?></label>
-        <input class="widefat" id="events-status" type="text" name="events-status" required maxlength="150"
-               placeholder="Open/Invited" value="<?php echo sanitize_text_field( $event_status ); ?>" /></p>
+    <label for="events-date"> <?php _e( 'Event Status'); ?>
+        <select class="widefat" id="events-status" required name="events-status">
+            <option>Open</option>
+            <option>Invited</option>
+    </select> </label>
 	<?php
 }
 
@@ -167,27 +177,6 @@ function events_save($post_id) {
 
 add_action( 'save_post', 'events_save');
 
-function events_custom_columns( $defaults ) {
-    unset( $defaults['date'] );
-    $defaults['events_date'] = 'Event Date';
-    $defaults['events_status'] ='Event Status';
-    return $defaults;
-}
-add_filter( 'manage_edit_event_columns', 'events_custom_columns', 10 );
-
-function events_custom_columns_content( $column_name, $post_id ) {
-    if ( 'events_date' == $column_name ) {
-        $date = get_post_meta( $post_id, 'events-date', true );
-        echo date( 'd-m-Y', $date );
-    }
-    if ( 'events_status' == $column_name ) {
-        $status = get_post_meta( $post_id, 'events-status', true );
-        echo $status;
-    }
-}
-add_action( 'manage_event_posts_custom_column', 'events_custom_columns_content', 10, 2 );
-
-
 function add_events_shortcode($atts){
 	$return = '';
 	extract(shortcode_atts(array(
@@ -203,13 +192,15 @@ function add_events_shortcode($atts){
         'meta_value' => $status,
 	) );
 		foreach($events as $event){
-		    $return .=
-                '<li>' . $event->post_title . '</li>' . '</br>' ;
-                $return .='Event Date: ' . date( 'd.m.y', intval( get_post_meta( $event->ID, 'events-date', true  ))) . '</br>' ;
-                $return .= 'Event Status: ' . get_post_meta( $event->ID, 'events-status', true );
+			$event_date = date( ' Y/m/d.', intval( get_post_meta( $event->ID, 'events-date', true ) ) );
+			$current_date = date('Y/m/d');
+			if( $event_date >= $current_date ) {
+				$return .=
+					'<li>' . $event->post_title . '</li>' . '</br>';
+				$return .= 'Event Date: ' . $event_date . '</br>';
+				$return .= 'Event Status: ' . get_post_meta( $event->ID, 'events-status', true );
+			}
 		}
-
-
 	/* Restore original Post Data */
 	wp_reset_postdata();
 	return $return;
